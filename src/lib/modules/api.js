@@ -9,11 +9,13 @@ async function getJson(req) {
   }
 }
 
-async function errorHandler(req, res) {
-  if (!req.ok) {
-    throw new Error((res && res.Message) || `${req.statusText} (${req.status})`)
+async function errorHandler(res, body) {
+  if (!res.ok) {
+    throw new Error(
+      (body && body.Message) || `${res.statusText} (${res.status})`
+    )
   }
-  return res
+  return body
 }
 
 async function request({
@@ -22,22 +24,28 @@ async function request({
   url,
   data,
   bodyParser,
-  errorHandler
+  errorHandler,
+  signal
 }) {
   try {
     const options = {
       method,
-      headers
+      headers,
+      signal
     }
+    const isJson = headers.get('Content-Type') === 'application/json'
     if (data) {
-      options.body = JSON.stringify(data)
+      options.body = isJson ? JSON.stringify(data) : data
     }
-    const req = await fetch(url, options)
-    const res = await bodyParser(req)
-    const handled = await errorHandler(req, res)
+    const res = await fetch(url, options)
+    const parsed = await bodyParser(res)
+    const handled = await errorHandler(res, parsed)
     return handled
   } catch (err) {
     console.log(err)
+    if (err.name === 'AbortError') {
+      console.log('fetch aborted', url)
+    }
     return err
   }
 }
@@ -66,6 +74,10 @@ class Api {
   }
 
   withHeader(key, value) {
+    if (!value) {
+      this.headers.delete(key)
+      return this
+    }
     this.headers.set(key, value)
     return this
   }
@@ -80,56 +92,61 @@ class Api {
     return this
   }
 
-  async get(url) {
+  async get(url, abortSignal) {
     return await request({
       method: 'GET',
       headers: this.headers,
       url: this.baseUrl + url,
       bodyParser: this.bodyParser,
-      errorHandler: this.errorHandler
+      errorHandler: this.errorHandler,
+      signal: abortSignal
     })
   }
 
-  async post(url, data) {
+  async post(url, data, abortSignal) {
     return await request({
       method: 'POST',
       headers: this.headers,
       url: this.baseUrl + url,
       data: data,
       bodyParser: this.bodyParser,
-      errorHandler: this.errorHandler
+      errorHandler: this.errorHandler,
+      signal: abortSignal
     })
   }
 
-  async put(url, data) {
+  async put(url, data, abortSignal) {
     return await request({
       method: 'PUT',
       headers: this.headers,
       url: this.baseUrl + url,
       data: data,
       bodyParser: this.bodyParser,
-      errorHandler: this.errorHandler
+      errorHandler: this.errorHandler,
+      signal: abortSignal
     })
   }
 
-  async patch(url, data) {
+  async patch(url, data, abortSignal) {
     return await request({
       method: 'PATCH',
       headers: this.headers,
       url: this.baseUrl + url,
       data: data,
       bodyParser: this.bodyParser,
-      errorHandler: this.errorHandler
+      errorHandler: this.errorHandler,
+      signal: abortSignal
     })
   }
 
-  async delete(url) {
+  async delete(url, abortSignal) {
     return await request({
       method: 'DELETE',
       headers: this.headers,
       url: this.baseUrl + url,
       bodyParser: this.bodyParser,
-      errorHandler: this.errorHandler
+      errorHandler: this.errorHandler,
+      signal: abortSignal
     })
   }
 }

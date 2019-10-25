@@ -1,6 +1,7 @@
 // modules
 import storage from './modules/storage'
 import Api from './modules/api'
+import hubConnectionBuilder from './modules/hubConnectionBuilder'
 
 // contexts
 import AuthProvider, { useAuth } from './contexts/AuthProvider'
@@ -11,7 +12,7 @@ import LoadingProvider, { useLoading } from './contexts/LoadingProvider'
 import { useRouter, useLocation, useParams } from './hooks/useRouter'
 import { useUrlQuery } from './hooks/useUrlQuery'
 
-export { storage, Api }
+export { storage, Api, hubConnectionBuilder }
 export {
   AuthProvider,
   useAuth,

@@ -1,6 +1,6 @@
 {
   "name": "mis-react",
-  "version": "0.2.0",
+  "version": "0.2.5",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "files": [
@@ -34,7 +34,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "pretty-quick --staged && npm run build"
+      "pre-commit": "pretty-quick --staged && npm run build && git add ."
     }
   },
   "browserslist": {

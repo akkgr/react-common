@@ -5,7 +5,7 @@ export function useUrlQuery() {
   const { location, navigate } = useLocation()
   const [query, setQuery] = useState(new URLSearchParams(location.search))
 
-  function changePagination(search, pagination) {
+  function applyPagination(search, pagination) {
     if (
       pagination.page < 1 ||
       pagination.page > pagination.total ||
@@ -17,7 +17,7 @@ export function useUrlQuery() {
     search.set('page', pagination.page)
   }
 
-  function changeSorting(search, sorter) {
+  function applySorting(search, sorter) {
     if (!sorter.field) {
       search.delete('sortBy')
       search.delete('sortDescending')
@@ -30,10 +30,15 @@ export function useUrlQuery() {
     }
   }
 
+  function applyFiltering(search, filters) {
+    console.log(filters)
+  }
+
   function onChange({ pagination, filters, sorter }) {
     const search = new URLSearchParams(location.search)
-    changePagination(search, pagination)
-    changeSorting(search, sorter)
+    applyPagination(search, pagination)
+    applySorting(search, sorter)
+    applyFiltering(search, filters)
     navigate(location.pathname + '?' + search.toString())
   }
 
